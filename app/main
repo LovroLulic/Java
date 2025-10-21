@@ -1,1 +1,269 @@
+package app;
+import entities.*;
 
+import java.math.BigDecimal;
+import java.util.Scanner;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner scanner=new Scanner(System.in);
+
+        User korisnik;
+        Vehicle[] vehicles=new Vehicle[5];
+
+        vehicles[0]=new Vehicle("ZG19055A","Tramvaj","Plava",2019);
+
+        vehicles[1]=new Vehicle("ZG23045B","Bus","Plava",2012);
+
+        vehicles[2]=new Vehicle("ZG01045C","Tramvaj","Bijela",2023);
+
+        int brojVozila=3;
+
+
+        Route[] routes=new Route[5];
+
+        routes[0]=new Route(vehicles[0],LocalDate.of(2025,12,23),
+                "15:35","Borongaj","Jarun",new BigDecimal("8.5"));
+        routes[1]=new Route(vehicles[1],LocalDate.of(2025,9,12),
+                "18:45","Glavni Kolodvor","Velika Gorica",new BigDecimal("14.5"));
+        routes[2]=new Route(vehicles[2],LocalDate.of(2026,1,30),
+                "09:20","Prisavlje","Mihaljevac",new BigDecimal("6"));
+
+
+        int brojRuta=3;
+        String lozinka;
+
+
+        //Korisnik
+        System.out.print("Unesite ime i prezime: ");
+        String name=scanner.nextLine();
+        System.out.print("Broj godina: ");
+        int age=scanner.nextInt();
+        scanner.nextLine();
+        System.out.print("Unesite username: ");
+        String nameID=scanner.nextLine();
+        System.out.print("Unesite email adresu: ");
+        String email=scanner.nextLine();
+        korisnik=new User(name,age,nameID,email);
+
+        System.out.println();
+        System.out.println("Dobrodosao "+korisnik.getName()+" ("+korisnik.getNameID()+", "+korisnik.getAge()+")");
+        System.out.println();
+
+
+        while(true){
+            System.out.println("1) Unos vozila i linije");
+            System.out.println("2) Pretrazivanje");
+            System.out.println("3) Izlaz");
+
+            int odabir=scanner.nextInt();
+            scanner.nextLine();
+
+            if(odabir==1){
+                if(!korisnik.getNameID().equals("llulic")){
+                    System.out.println("Greska! Korisnik "+korisnik.getNameID()+" nije autoriziran za ovu opciju.");
+                    continue;
+                }
+                System.out.print("Unesite lozinku za administratora ("+korisnik.getNameID()+"): ");
+                lozinka=scanner.nextLine();
+                if(!"admin123".equals(lozinka)){
+                    System.out.println("Greska! Lozinka nije ispravna.");
+                    continue;
+                }
+                System.out.println("Lozinka je ispravna.");
+                System.out.println("\n=== UNOS VOZILA I LINIJA ===");
+                System.out.println("Trenutno stanje vozila: " + brojVozila + "/" + vehicles.length);
+
+                if(brojVozila<vehicles.length){
+                    System.out.print("Koliko novih vozila zelite dodati? ");
+                    int brojVozilaZaDodavanje=scanner.nextInt();
+                    scanner.nextLine();
+                    if(brojVozilaZaDodavanje==0){
+                        continue;
+                    }
+                    else if(brojVozilaZaDodavanje>vehicles.length-brojVozila){
+                        System.out.println("Greska! Nemate dovoljno mjesta za nove vozila.");
+                        continue;
+                    }
+                    for(int i=0;i<brojVozilaZaDodavanje;i++){
+                        System.out.print("Unesite registraciju "+(brojVozila+brojVozilaZaDodavanje)+". vozila: ");
+                        String registration=scanner.nextLine();
+                        System.out.print("Unesite tip vozila (Bus/Tramvaj): ");
+                        String model=scanner.nextLine();
+                        while(!model.equals("Bus") && !model.equals("Tramvaj")){
+                            System.out.print("Greska! Pogresan tip vozila! Unesite tip vozila (Bus/Tramvaj): ");
+                            model=scanner.nextLine();
+                        }
+                        System.out.print("Unesite boju: ");
+                        String color=scanner.nextLine();
+                        System.out.print("Unesite godinu proizvodnje: ");
+                        int year=scanner.nextInt();
+                        scanner.nextLine();
+                        vehicles[brojVozila]=new Vehicle(registration,model,color,year);
+                        brojVozila++;
+                    }
+
+                    System.out.println();
+
+                    for(int i=0;i<brojVozilaZaDodavanje;i++){
+                        System.out.print("Pocetna stanica: ");
+                        String pocetnastanica=scanner.nextLine();
+                        System.out.print("Krajnja stanica: ");
+                        String krajnjastanica=scanner.nextLine();
+
+                        System.out.print("Kilometraza: ");
+                        BigDecimal kilometers=scanner.nextBigDecimal();
+                        scanner.nextLine();
+
+                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+
+                        System.out.print("Datum (dd.MM.yyyy): ");
+                        LocalDate datum=LocalDate.parse(scanner.nextLine(),formatter);
+
+                        System.out.print("Vrijeme polaska: ");
+                        String vrijemepolaska=scanner.nextLine();
+
+                        Vehicle odabranovozilo=null;
+
+                        while(odabranovozilo==null){
+                            System.out.print("Unesite registraciju vozila za taj smjer: ");
+                            String registracijazasmjer=scanner.nextLine();
+                            for(int j=0;j<brojVozila;j++){
+                                if(vehicles[j].getRegistration().equalsIgnoreCase(registracijazasmjer)){
+                                    odabranovozilo=vehicles[j];
+                                    break;
+                                }
+                            }
+                            if(odabranovozilo==null){
+                                System.out.println("Greska! Vozilo sa registracijom "+registracijazasmjer+" ne postoji.");
+                                continue;
+                            }
+                        }
+
+                        routes[brojRuta]=new Route(odabranovozilo,datum,vrijemepolaska,pocetnastanica,krajnjastanica,kilometers);
+                        brojRuta++;
+                        System.out.println("Linija uspjesno dodana!");
+
+
+
+                    }
+
+                }
+
+
+
+            }
+
+            else if(odabir==2){
+                if(brojRuta==0){
+                    System.out.println("Nema vozila i linija.");
+                    continue;
+                }
+                while(true) {
+                    System.out.println("Pretrazivanje po:\n1)Registracija\n2)Polaziste\n3)Kilometraza\n4)Prikaz linija\n5)Izlaz");
+                    String odabir2;
+                    odabir2 = scanner.nextLine();
+
+                    if (odabir2.equals("1")) {
+                        System.out.print("Unesite registraciju: ");
+                        String registracijavozila = scanner.nextLine();
+                        boolean postoji=false;
+                        for (int i = 0; i < brojRuta; i++) {
+                            if (registracijavozila.equalsIgnoreCase(routes[i].getVehicle().getRegistration())) {
+                                System.out.println();
+                                routes[i].ispis();
+                                postoji=true;
+                                System.out.println();
+                            }
+
+                        }
+                        if(!postoji){
+                            System.out.println("Greska! Vozilo sa registracijom "+registracijavozila+" ne postoji.");
+                        }
+                        continue;
+                    }
+                    else if (odabir2.equals("2")) {
+                        System.out.print("Unesite polaziste: ");
+                        String polaziste = scanner.nextLine();
+                        boolean postoji=false;
+                        for (int i = 0; i < brojRuta; i++) {
+                            if (polaziste.equalsIgnoreCase(routes[i].getPocetnastanica())) {
+                                System.out.println();
+                                routes[i].ispis();
+                                postoji=true;
+                                System.out.println();
+                            }
+
+                        }
+                        if(!postoji){
+                            System.out.println("Greska! Linija koja krece iz "+polaziste+" ne postoji.");
+                        }
+                        continue;
+                    }
+                    else if (odabir2.equals("3")) {
+                        while(true) {
+
+                            System.out.println("1)Najkraca linija\n2)Najduza linija\n3)Izlaz");
+                            odabir2 = scanner.nextLine();
+                            if (odabir2.equals("1")) {
+                                BigDecimal najkraca = new BigDecimal(1000);
+                                int index = -1;
+                                for (int i = 0; i < brojRuta; i++) {
+                                    if (routes[i].getKilometers().compareTo(najkraca) < 0) {
+                                        najkraca = routes[i].getKilometers();
+                                        index = i;
+                                    }
+                                }
+                                System.out.println();
+                                System.out.println("Najkraca linija: ");
+                                System.out.println();
+                                routes[index].ispis();
+                                System.out.println();
+                                continue;
+                            }
+
+                            else if (odabir2.equals("2")) {
+                                BigDecimal najduzna = new BigDecimal(0);
+                                int index = -1;
+                                for (int i = 0; i < brojRuta; i++) {
+                                    if (routes[i].getKilometers().compareTo(najduzna) > 0) {
+                                        najduzna = routes[i].getKilometers();
+                                        index = i;
+                                    }
+                                }
+                                System.out.println();
+                                System.out.println("Najduza linija: ");
+                                System.out.println();
+                                routes[index].ispis();
+                                System.out.println();
+                                continue;
+                            }
+
+                            else if(odabir2.equals("3")){
+                                break;
+                            }
+                        }
+                    }
+                    else if(odabir2.equals("4")){
+                        System.out.println("=== LINIJE ===");
+                        System.out.println();
+                        for(int i=0;i<brojRuta;i++){
+                            routes[i].ispis();
+                            System.out.println();
+                        }
+                    }
+
+                    else if(odabir2.equals("5")){
+                        break;
+                    }
+                }
+            }
+            else if(odabir==3){
+                break;
+            }
+        }
+    }
+}
