@@ -1,6 +1,6 @@
 package entities;
 
-public class Vehicle {
+public abstract class Vehicle {
     private String registration;
     private String type;
     private String color;
@@ -45,11 +45,5 @@ public class Vehicle {
         this.year = year;
     }
 
-    public void ispis(){
-        System.out.println("Registracija: " + registration + ", Model: "
-                + type + ", Boja: " + color + ", Godina proizvodnje: " + year);
-
-        //Nije bitno jel preko gettera ili direktno jer se
-        //i dalje nalazimo u istoj klasi.
-    }
+    public abstract void ispis();
 }
